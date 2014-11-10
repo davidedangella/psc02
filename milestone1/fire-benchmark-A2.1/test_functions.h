@@ -23,6 +23,13 @@ int write_pstats_partition( int input_key,
 				            int local_intc,
 				            int local_extc );
 
+int test_distribution2(char *file_in, int nintci_m, int nintcf_m, int nextci_m
+		, int nextcf_m, int** lcc_m,
+		double *bs_m,double *be_m,double *bn_m,double *bw_m,double *bh_m,double *bl_m,
+        double *bp_m, double *su_m, int points_count_m, int** points_m, int* elems_m,
+        char *file_vtk_out, int *local_global_index,
+                      int local_num_elems, double *scalars);
+
 
 #endif /* TEST_FUNCTIONS_H_ */
 

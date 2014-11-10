@@ -6,6 +6,10 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include "util_read_files.h"
+#include "util_write_files.h"
+#include "test_functions.h"
 
 int test_distribution(char *file_in, char *file_vtk_out, int *local_global_index,
                       int local_num_elems, double *scalars) {
@@ -73,6 +77,73 @@ int test_distribution(char *file_in, char *file_vtk_out, int *local_global_index
     }
     free( points_m );
     free( distr );
+
+    return 0;
+}
+
+int test_distribution2(char *file_in, int nintci_m, int nintcf_m, int nextci_m
+		, int nextcf_m, int** lcc_m,
+		double *bs_m,double *be_m,double *bn_m,double *bw_m,double *bh_m,double *bl_m,
+        double *bp_m, double *su_m, int points_count_m, int** points_m, int* elems_m,
+        char *file_vtk_out, int *local_global_index,
+                      int local_num_elems, double *scalars) {
+
+    // global sized variables, for reading the input file
+    /*int nintci_m, nintcf_m;
+    int nextci_m, nextcf_m;
+    int **lcc_m;
+    double *bs_m, *be_m, *bn_m, *bw_m, *bh_m, *bl_m;
+    double *bp_m;
+    double *su_m;
+    int points_count_m;
+    int** points_m;
+    int* elems_m;
+    int i;*/
+
+
+    // allocate distribution vector
+    /*double *distr;
+    if ( ( distr = (double *) malloc( ( nintcf_m + 1 ) * sizeof(double) ) )
+            == NULL ) {
+        printf( "malloc failed to allocate distr array" );
+        return -1;
+    }
+    for ( i = nintci_m; i < ( nintcf_m + 1 ); i++ ) {
+        distr[i] = 0.0;
+    }
+
+    // copy the local values using the generated map
+    for ( i = 0; i < local_num_elems; i++ ) {
+        distr[local_global_index[i]] = scalars[i];
+    }*/
+    // write vtk file
+    vtk_write_unstr_grid_header( file_in, file_vtk_out, nintci_m, nintcf_m,
+            points_count_m, points_m, elems_m );
+    vtk_append_double( file_vtk_out, "SCALARS", nintci_m, nintcf_m, scalars );
+    printf( "Distribution VTK file succesfully generated! \n" );
+
+    // free the allocated memory
+    /*free( su_m );
+    free( bp_m );
+    free( bh_m );
+    free( bl_m );
+    free( bw_m );
+    free( bn_m );
+    free( be_m );
+    free( bs_m );
+    free( elems_m );
+
+    for ( i = 0; i < nintcf_m + 1; i++ ) {
+        free( lcc_m[i] );
+    }
+    free( lcc_m );
+
+    for ( i = 0; i < points_count_m; i++ ) {
+        free( points_m[i] );
+    }
+    free( points_m );
+    free( distr );
+*/
 
     return 0;
 }

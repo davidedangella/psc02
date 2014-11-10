@@ -15,6 +15,19 @@
 #include "finalization.h"
 #include "test_functions.h"
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 int main(int argc, char *argv[]) {
     int my_rank, num_procs, i;
 
@@ -89,7 +102,30 @@ int main(int argc, char *argv[]) {
         MPI_Abort(MPI_COMM_WORLD, my_rank);
     }
 
-   
+    int *epart;
+    call_metis(nintci, nintcf, points_count, elems, num_procs, my_rank, &epart);
+
+    char fname[100];
+    sprintf(fname, "out.aa.aa.%d.0.vtk", my_rank);
+    double* s = malloc((nintcf+1)*sizeof(double));
+    for(i=0;i<=nintcf;i++)
+    	s[i]=(double)(my_rank+1);
+    test_distribution(file_in, fname, local_global_index, nintcf, s);
+
+    sprintf(fname, "out2.aa.aa.%d.0.vtk", my_rank);
+    test_distribution2(file_in, nintci, nintcf, nextci, nextcf, lcc,
+    		bs, be,bn,bw,bh,bl,
+            bp, su,  points_count, points,  elems,
+            fname, local_global_index, nintcf, s);
+
+
+    /*char *file_in, int nintci_m, int nintcf_m, int nextci_m, int nextcf_m, int lcc_m,
+    		double *bs_m,double *be_m,double *bn_m,double *bw_m,double *bh_m,double *bl_m,
+            double *bp_m, double *su_m, int points_count_m, int** points_m, int* elems_m,
+            char *file_vtk_out, int *local_global_index,
+                          int local_num_elems, double *scalars
+
+*/
     /********** END INITIALIZATION **********/
 
     /********** START COMPUTATIONAL LOOP **********/

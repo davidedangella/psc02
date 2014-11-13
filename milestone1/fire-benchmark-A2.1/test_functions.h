@@ -30,6 +30,9 @@ int test_distribution2(char *file_in, int nintci_m, int nintcf_m, int nextci_m
         char *file_vtk_out, int *local_global_index,
                       int local_num_elems, double *scalars);
 
+int test_distribution3(char *file_in, char *file_vtk_out, int *local_global_index,
+                      int local_num_elems, double *scalars);
+
 
 #endif /* TEST_FUNCTIONS_H_ */
 

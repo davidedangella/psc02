@@ -13,7 +13,7 @@
 
 int allocate_local_arrays(int *NINTCI, int *NINTCF, int *NEXTCI, int *NEXTCF, int ***LCC,
         double **BS, double **BE, double **BN, double **BW, double **BL, double **BH,
-        double **BP, double **SU, int* points_count, int*** points, int** elems){
+        double **BP, double **SU, int* points_count, int*** points, int** elems, int **local_to_global){
 
 	int i;
 
@@ -87,12 +87,17 @@ int allocate_local_arrays(int *NINTCI, int *NINTCF, int *NEXTCI, int *NEXTCF, in
 			}
 		}
 
+	    if ( (*local_to_global = (int *) malloc((*NEXTCF + 1) * sizeof(int))) == NULL ) {
+	        fprintf(stderr, "malloc(local_to_global) failed\n");
+	        return -1;
+	    }
+
 	    return 0;
 }
 
 
 int realloc_local_array(int* nextcf, double** bs, double** be, double** bn, double** bw,
-        double** bl, double** bh, double** bp, double** su){
+        double** bl, double** bh, double** bp, double** su, int** local_to_global){
 
 	 if ( (*bs = (double *) realloc(*bs, (*nextcf + 1) * sizeof(double))) == NULL ) {
 	        fprintf(stderr, "realloc(BS) failed\n");
@@ -133,6 +138,13 @@ int realloc_local_array(int* nextcf, double** bs, double** be, double** bn, doub
 	        fprintf(stderr, "realloc(SU) failed\n");
 	        return -1;
 	    }
+
+	    if ( (*local_to_global = (int *) realloc(*su, (*nextcf + 1) * sizeof(int))) == NULL ) {
+	        fprintf(stderr, "realloc(local_to_global) failed\n");
+	        return -1;
+	    }
+
+
 
 	    return 0;
 }

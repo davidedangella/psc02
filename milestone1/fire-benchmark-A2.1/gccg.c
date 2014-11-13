@@ -31,7 +31,7 @@
 int main(int argc, char *argv[]) {
     int my_rank, num_procs, i;
 
-    const int max_iters = 10000;    /// maximum number of iteration to perform
+//    const int max_iters = 10000;    /// maximum number of iteration to perform
 
     /** Simulation parameters parsed from the input datasets */
     int nintci, nintcf;    /// internal cells start and end index
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     double *bp;    /// Pole coefficient
     double *su;    /// Source values
 
-    double residual_ratio;    /// the ratio between the reference and the current residual
+//    double residual_ratio;    /// the ratio between the reference and the current residual
     double *var;    /// the variation vector -> keeps the result in the end
 
     /** Additional vectors required for the computation */
@@ -102,21 +102,18 @@ int main(int argc, char *argv[]) {
         MPI_Abort(MPI_COMM_WORLD, my_rank);
     }
 
-    int *epart;
-    call_metis(nintci, nintcf, points_count, elems, num_procs, my_rank, &epart);
+    //int *epart;
+    //call_metis(nintci, nintcf, points_count, elems, num_procs, my_rank, &epart);
 
     char fname[100];
-    sprintf(fname, "out.aa.aa.%d.0.vtk", my_rank);
+    sprintf(fname, "out.%s.%s.%d.vtk", read_type, part_type, my_rank);
     double* s = malloc((nintcf+1)*sizeof(double));
     for(i=0;i<=nintcf;i++)
     	s[i]=(double)(my_rank+1);
     test_distribution(file_in, fname, local_global_index, nintcf, s);
 
-    sprintf(fname, "out2.aa.aa.%d.0.vtk", my_rank);
-    test_distribution2(file_in, nintci, nintcf, nextci, nextcf, lcc,
-    		bs, be,bn,bw,bh,bl,
-            bp, su,  points_count, points,  elems,
-            fname, local_global_index, nintcf, s);
+    sprintf(fname, "out3.%s.%s.aa.aa%d.vtk", read_type, part_type, my_rank);
+    test_distribution3(file_in, fname, local_global_index, nintcf, s);
 
 
     /*char *file_in, int nintci_m, int nintcf_m, int nextci_m, int nextcf_m, int lcc_m,

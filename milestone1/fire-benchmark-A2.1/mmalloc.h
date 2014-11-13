@@ -10,7 +10,7 @@
 
 int allocate_local_arrays(int *NINTCI, int *NINTCF, int *NEXTCI, int *NEXTCF, int ***LCC,
         double **BS, double **BE, double **BN, double **BW, double **BL, double **BH,
-        double **BP, double **SU, int* points_count, int*** points, int** elems);
+        double **BP, double **SU, int* points_count, int*** points, int** elems, int **local_to_global);
 
 int realloc_local_array(int* nextcf, double** bs, double** be, double** bn, double** bw,
         double** bl, double** bh, double** bp, double** su);

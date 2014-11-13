@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include "util_read_files.h"
 #include "util_write_files.h"
@@ -80,6 +81,91 @@ int test_distribution(char *file_in, char *file_vtk_out, int *local_global_index
 
     return 0;
 }
+
+
+int test_distribution3(char *file_in, char *file_vtk_out, int *local_global_index,
+                      int local_num_elems, double *scalars) {
+
+    // global sized variables, for reading the input file
+    int nintci_m, nintcf_m;
+    int nextci_m, nextcf_m;
+    int **lcc_m;
+    double *bs_m, *be_m, *bn_m, *bw_m, *bh_m, *bl_m;
+    double *bp_m;
+    double *su_m;
+    int points_count_m;
+    int** points_m;
+    int* elems_m;
+    int i,j;
+
+    // read the entire file
+    int f_status = read_binary_geo( file_in, &nintci_m, &nintcf_m, &nextci_m,
+            &nextcf_m, &lcc_m, &bs_m, &be_m, &bn_m, &bw_m, &bl_m, &bh_m, &bp_m,
+            &su_m, &points_count_m, &points_m, &elems_m );
+    if ( f_status != 0 ) {
+        printf( "Error in reading input file \n" );
+        return -1;
+    }
+
+    // allocate distribution vector
+    double *distr;
+    if ( ( distr = (double *) malloc( ( nintcf_m + 1 ) * sizeof(double) ) )
+            == NULL ) {
+        printf( "malloc failed to allocate distr array" );
+        return -1;
+    }
+    for ( i = nintci_m; i < ( nintcf_m + 1 ); i++ ) {
+        distr[i] = 0.0;
+    }
+
+    // copy the local values using the generated map
+    for ( i = 0; i < local_num_elems; i++ ) {
+        distr[local_global_index[i]] = scalars[i];
+    }
+
+    int ** local_points = malloc(local_num_elems*6*sizeof(int*));
+    for(i=0;i<local_num_elems;i++)
+    	local_points[i] = malloc(3*sizeof(int));
+
+    int * local_elems = malloc(local_num_elems*6*sizeof(int));
+
+    for(i=0;i<local_num_elems;i++){
+    	memcpy(local_elems+i*6, elems_m+local_global_index[i]*6, 6*sizeof(int) );
+    	for(j=0;j<6;j++)
+    		memcpy(local_points[i], points_m[ elems_m[local_global_index[i]*6+j] ], 3*sizeof(int) );
+    }
+
+    // write vtk file
+    vtk_write_unstr_grid_header( file_in, file_vtk_out, nintci_m, nintcf_m,
+            points_count_m, local_points, local_elems );
+    vtk_append_double( file_vtk_out, "SCALARS", nintci_m, nintcf_m, distr );
+    printf( "Distribution VTK file succesfully generated! \n" );
+
+    // free the allocated memory
+    free( su_m );
+    free( bp_m );
+    free( bh_m );
+    free( bl_m );
+    free( bw_m );
+    free( bn_m );
+    free( be_m );
+    free( bs_m );
+    free( elems_m );
+
+    for ( i = 0; i < nintcf_m + 1; i++ ) {
+        free( lcc_m[i] );
+    }
+    free( lcc_m );
+
+    for ( i = 0; i < points_count_m; i++ ) {
+        free( points_m[i] );
+    }
+    free( points_m );
+    free( distr );
+
+    return 0;
+}
+
 
 int test_distribution2(char *file_in, int nintci_m, int nintcf_m, int nextci_m
 		, int nextcf_m, int** lcc_m,

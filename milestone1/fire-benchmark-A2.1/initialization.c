@@ -84,8 +84,33 @@ void call_metis(int part_key, int nprocs, int my_rank, MeshData *global, idx_t**
 		if( status != METIS_OK ) 	printf("ERROR IN METIS\n");
 		else						printf("METIS SUCCESSFFUL\n");
 
+		free(eptr); free(npart); free(eind);
+
 }
 
+
+void free_data(MeshData* data){
+	int i;
+	    free(data->su);
+	    free(data->bp);
+	    free(data->bh);
+	    free(data->bl);
+	    free(data->bw);
+	    free(data->bn);
+	    free(data->be);
+	    free(data->bs);
+	    free(data->elems);
+
+	    for ( i = 0; i < data->nintcf + 1; i++ ) {
+	        free(data->lcc[i]);
+	    }
+	    free(data->lcc);
+
+	    for ( i = 0; i < data->points_count; i++ ) {
+	        free(data->points[i]);
+	    }
+	    free(data->points);
+}
 
 
 void compute_local_lcc( MeshData* local, MeshData* global, int* local_to_global, int* global_to_local){
@@ -265,7 +290,10 @@ void get_local_elements_data( int nprocs, int myrank, int part_key, int read_key
 			local->points_count =  global->points_count;
 
 			compute_local_lcc(local, global, *local_to_global, global_to_local);
+			free(global_to_local);
+			free(epart);
 		}
+		free_data(global);
 	} else if(read_key == READ_ONEREAD){
 		if(part_key == PART_CLASSIC){
 			MPI_Bcast(&(global->nintci), 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -338,6 +366,9 @@ void get_local_elements_data( int nprocs, int myrank, int part_key, int read_key
 			local->nextci=global->nextci;
 
 			compute_local_lcc2(local, local, *local_to_global, global_to_local);
+			free(global_to_local);
+			if(myrank==0)
+				free_data(global);
 		}else if (part_key==PART_DUAL || part_key==PART_NODAL){
 
 			MPI_Bcast(&(global->nintci), 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -359,24 +390,24 @@ void get_local_elements_data( int nprocs, int myrank, int part_key, int read_key
 				int **global_to_local =  (int**) malloc(nprocs*sizeof(int*));
 				int **local_to_global_all =  (int**) malloc(nprocs*sizeof(int*));
 
-				int **bw = (int**) malloc(nprocs*sizeof(int*));
-				int **bs = (int**) malloc(nprocs*sizeof(int*));
-				int **be = (int**) malloc(nprocs*sizeof(int*));
-				int **bl = (int**) malloc(nprocs*sizeof(int*));
-				int **bn = (int**) malloc(nprocs*sizeof(int*));
-				int **bh = (int**) malloc(nprocs*sizeof(int*));
-				int **bp = (int**) malloc(nprocs*sizeof(int*));
-				int **su = (int**) malloc(nprocs*sizeof(int*));
+				double **bw = (double**) malloc(nprocs*sizeof(double*));
+				double **bs = (double**) malloc(nprocs*sizeof(double*));
+				double **be = (double**) malloc(nprocs*sizeof(double*));
+				double **bl = (double**) malloc(nprocs*sizeof(double*));
+				double **bn = (double**) malloc(nprocs*sizeof(double*));
+				double **bh = (double**) malloc(nprocs*sizeof(double*));
+				double **bp = (double**) malloc(nprocs*sizeof(double*));
+				double **su = (double**) malloc(nprocs*sizeof(double*));
 				int **lcc = (int**) malloc(nprocs*sizeof(int*));
 				for(i=0; i<nprocs;i++){
-					bw[i] =  (int*) malloc(size[i]*sizeof(int));
-					bs[i] =  (int*) malloc(size[i]*sizeof(int));
-					be[i] =  (int*) malloc(size[i]*sizeof(int));
-					bl[i] =  (int*) malloc(size[i]*sizeof(int));
-					bn[i] =  (int*) malloc(size[i]*sizeof(int));
-					bh[i] =  (int*) malloc(size[i]*sizeof(int));
-					bp[i] =  (int*) malloc(size[i]*sizeof(int));
-					su[i] =  (int*) malloc(size[i]*sizeof(int));
+					bw[i] =  (double*) malloc(size[i]*sizeof(double));
+					bs[i] =  (double*) malloc(size[i]*sizeof(double));
+					be[i] =  (double*) malloc(size[i]*sizeof(double));
+					bl[i] =  (double*) malloc(size[i]*sizeof(double));
+					bn[i] =  (double*) malloc(size[i]*sizeof(double));
+					bh[i] =  (double*) malloc(size[i]*sizeof(double));
+					bp[i] =  (double*) malloc(size[i]*sizeof(double));
+					su[i] =  (double*) malloc(size[i]*sizeof(double));
 
 					lcc[i] =  (int*) malloc(size[i]*6*sizeof(int));
 					global_to_local[i]  =  (int*) malloc((global->nextcf+1)*sizeof(int));
@@ -446,7 +477,7 @@ void get_local_elements_data( int nprocs, int myrank, int part_key, int read_key
 
 				compute_local_lcc(local, global, *local_to_global, global_to_local[0]);
 
-			    	char fname[100];
+			    /*	char fname[100];
 				sprintf(fname, "out.part.%d.vtk",  0);
 				double* s = malloc((global->nintcf+1)*sizeof(double));
 				int* identity = malloc((global->nintcf+1)*sizeof(int));
@@ -454,7 +485,18 @@ void get_local_elements_data( int nprocs, int myrank, int part_key, int read_key
 					s[i]=(double)(epart[i]+1);
 					identity[i]=i;
 				}
-				test_distribution("drall.geo.bin", fname, identity, global->nintcf+1, s);
+				test_distribution("drall.geo.bin", fname, identity, global->nintcf+1, s);*/
+
+				for(i=0; i<nprocs;i++){
+					free(bw[i]); free(bs[i]); free(be[i]); free(bl[i]); free(bn[i]); free(bh[i]); free(bp[i]); free(su[i]);
+
+					free(lcc[i]);
+					free(global_to_local[i]);
+					free(local_to_global_all[i]);
+				}
+
+				free(bw); free(bs); free(be); free(bl); free(bn); free(bh); free(bp); free(su); free(lcc); free(global_to_local); free(local_to_global_all);
+				free(epart);
 			} else {
 
 				int size;
@@ -483,6 +525,7 @@ void get_local_elements_data( int nprocs, int myrank, int part_key, int read_key
 					global->lcc[i]=(int*) malloc(6*sizeof(int));
 				for(i=0;i<size;i++)
 					memcpy(global->lcc[i], lcc_linear+i*6, sizeof(int)*6);
+				free(lcc_linear);
 
 
 

@@ -83,6 +83,47 @@ int test_distribution(char *file_in, char *file_vtk_out, int *local_global_index
 }
 
 
+
+void compute_local_elements_nodes( int nintci, int nintcf, int* global_elems, int** global_points, int global_points_count, int** local_points, int* local_elems, int* local_points_count, int* local_to_global){
+	int i, j;//, k;
+	int global_elem;
+	int global_node;
+	int local_node_ix = 0;
+
+	int * points_global_to_local = (int*) malloc((global_points_count)*sizeof(int));
+	// points_to_local: will have index from 0 to max_index of the point contained in the domain
+	// the rest will be -1 --> point with global index [i] not in the local domain
+
+	for(i=0;i<global_points_count;i++)
+		points_global_to_local[i]=-1;
+
+
+	for(i=nintci; i<nintcf+1; i++){
+
+		global_elem = local_to_global[i]*8;
+
+		for(j=0; j<8; j++){
+			global_node = global_elems[ global_elem + j ];
+
+			if( points_global_to_local[  global_node   ] == -1 ) {
+				points_global_to_local[  global_node   ] = local_node_ix;
+
+					memcpy(local_points[local_node_ix], global_points[ global_node ], 3*sizeof(int));
+
+				local_node_ix++;
+			}
+
+			local_elems[i*8+j] = points_global_to_local[ global_node ];
+		}
+
+	}
+
+	*local_points_count=local_node_ix;
+
+	free(points_global_to_local);
+}
+
+
 int test_distribution3(char *file_in, char *file_vtk_out, int *local_global_index,
                       int local_num_elems, double *scalars) {
 
@@ -96,7 +137,7 @@ int test_distribution3(char *file_in, char *file_vtk_out, int *local_global_inde
     int points_count_m;
     int** points_m;
     int* elems_m;
-    int i,j;
+    int i;
 
     // read the entire file
     int f_status = read_binary_geo( file_in, &nintci_m, &nintcf_m, &nextci_m,
@@ -123,22 +164,20 @@ int test_distribution3(char *file_in, char *file_vtk_out, int *local_global_inde
         distr[local_global_index[i]] = scalars[i];
     }
 
-    int ** local_points = malloc(local_num_elems*6*sizeof(int*));
-    for(i=0;i<local_num_elems;i++)
+    int ** local_points = malloc(points_count_m*sizeof(int*));
+    for(i=0;i<points_count_m;i++)
     	local_points[i] = malloc(3*sizeof(int));
 
-    int * local_elems = malloc(local_num_elems*6*sizeof(int));
+    int * local_elems = malloc(local_num_elems*8*sizeof(int));
+    int local_points_count;
 
-    for(i=0;i<local_num_elems;i++){
-    	memcpy(local_elems+i*6, elems_m+local_global_index[i]*6, 6*sizeof(int) );
-    	for(j=0;j<6;j++)
-    		memcpy(local_points[i], points_m[ elems_m[local_global_index[i]*6+j] ], 3*sizeof(int) );
-    }
+
+    compute_local_elements_nodes( 0, local_num_elems-1, elems_m, points_m, points_count_m, local_points, local_elems, &local_points_count, local_global_index);
 
     // write vtk file
-    vtk_write_unstr_grid_header( file_in, file_vtk_out, nintci_m, nintcf_m,
-            points_count_m, local_points, local_elems );
-    vtk_append_double( file_vtk_out, "SCALARS", nintci_m, nintcf_m, distr );
+    vtk_write_unstr_grid_header( file_in, file_vtk_out, 0, local_num_elems-1,
+    		local_points_count, local_points, local_elems );
+    vtk_append_double( file_vtk_out, "SCALARS", 0, local_num_elems-1, scalars );
     printf( "Distribution VTK file succesfully generated! \n" );
 
     // free the allocated memory

@@ -87,6 +87,7 @@ int main(int argc, char *argv[]) {
 
     /********** START INITIALIZATION **********/
     // read-in the input file
+
     int init_status = initialization(file_in, part_type, read_type, num_procs, my_rank,
                                      &nintci, &nintcf, &nextci, &nextcf, 
                                      &lcc, &bs, &be, &bn, &bw, &bl, &bh, &bp, &su, 
@@ -106,14 +107,14 @@ int main(int argc, char *argv[]) {
     //call_metis(nintci, nintcf, points_count, elems, num_procs, my_rank, &epart);
 
     char fname[100];
-    sprintf(fname, "out.%s.%s.%d.vtk", read_type, part_type, my_rank);
+    sprintf(fname, "out.%s.%s.%s.%d.vtk", file_in, read_type, part_type, my_rank);
     double* s = malloc((nintcf+1)*sizeof(double));
     for(i=0;i<=nintcf;i++)
     	s[i]=(double)(my_rank+1);
-    test_distribution(file_in, fname, local_global_index, nintcf, s);
+    test_distribution(file_in, fname, local_global_index, nintcf+1, s);
 
-    sprintf(fname, "out3.%s.%s.aa.aa%d.vtk", read_type, part_type, my_rank);
-    test_distribution3(file_in, fname, local_global_index, nintcf, s);
+    sprintf(fname, "out3.%s.%s.%s.%d.0.vtk", file_in, read_type, part_type, my_rank);
+    test_distribution3(file_in, fname, local_global_index, nintcf+1, s);
 
 
     /*char *file_in, int nintci_m, int nintcf_m, int nextci_m, int nextcf_m, int lcc_m,

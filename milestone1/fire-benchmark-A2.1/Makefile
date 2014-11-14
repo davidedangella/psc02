@@ -6,7 +6,7 @@
 
 CC = mpicc
 CFLAGS = -Wall -g -O0 
-LIBS = -lm -lmetis
+LIBS = -lm -lmetis -lpapi
 
 LIBPOS=libpos.a
 AR = ar

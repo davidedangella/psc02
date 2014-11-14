@@ -8,7 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "mpi.h"
+#include <mpi.h>
+#include <libgen.h>
 
 #include "initialization.h"
 #include "compute_solution.h"
@@ -106,16 +107,30 @@ int main(int argc, char *argv[]) {
     //int *epart;
     //call_metis(nintci, nintcf, points_count, elems, num_procs, my_rank, &epart);
 
-    char fname[100];
-    sprintf(fname, "out.%s.%s.%s.%d.vtk", file_in, read_type, part_type, my_rank);
+   /* char fname[100];
+    sprintf(fname, "out.%s.%s.%s.%d.vtk", basename(file_in), read_type, part_type, my_rank);
     double* s = malloc((nintcf+1)*sizeof(double));
     for(i=0;i<=nintcf;i++)
     	s[i]=(double)(my_rank+1);
     test_distribution(file_in, fname, local_global_index, nintcf+1, s);
 
-    sprintf(fname, "out3.%s.%s.%s.%d.0.vtk", file_in, read_type, part_type, my_rank);
+    sprintf(fname, "out3.%s.%s.%s.%d.0.vtk", basename(file_in), read_type, part_type, my_rank);
     test_distribution3(file_in, fname, local_global_index, nintcf+1, s);
+*/
+    char fname[100];
+    sprintf(fname, "cgup.%s.%s.%s.%d.vtk", basename(file_in), read_type, part_type, my_rank);
+    test_distribution(file_in, fname, local_global_index, nintcf+1, cgup);
 
+    sprintf(fname, "su.%s.%s.%s.%d.vtk", basename(file_in), read_type, part_type, my_rank);
+    test_distribution(file_in, fname, local_global_index, nintcf+1, su);
+
+    sprintf(fname, "proc.%s.%s.%s.%d.vtk", basename(file_in), read_type, part_type, my_rank);
+    double* s = malloc((nintcf+1)*sizeof(double));
+    for(i=0;i<=nintcf;i++)
+    	s[i]=(double)(my_rank+1);
+    test_distribution(file_in, fname, local_global_index, nintcf+1, s);
+
+    free(s);
 
     /*char *file_in, int nintci_m, int nintcf_m, int nextci_m, int nextcf_m, int lcc_m,
     		double *bs_m,double *be_m,double *bn_m,double *bw_m,double *bh_m,double *bl_m,
